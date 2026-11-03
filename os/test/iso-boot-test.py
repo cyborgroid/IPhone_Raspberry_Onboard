@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Boots the ISO with KVM and UEFI on QEMU's VMware SVGA device, the same vmwgfx
-driver the guest uses under VMware, and saves a screenshot at intervals.
+"""Boots the ISO with KVM and UEFI and saves a screenshot at intervals. QEMU's
+virtio GPU is used because vmwgfx needs more of the SVGA device than QEMU's copy of
+it offers, so this does not prove the VMware driver; its connector name, Virtual-1,
+is the same.
 
   os/test/iso-boot-test.py <iso> <out dir> <seconds> [secs:x:y ...]
 
@@ -19,7 +21,7 @@ import time
 
 SHOT_EVERY = 30
 TABLET_MAX = 32767
-SCREEN_W, SCREEN_H = 482, 1049
+SCREEN_W, SCREEN_H = 480, 1044
 OVMF = "/usr/share/OVMF/OVMF_CODE_4M.fd"
 OVMF_VARS = "/usr/share/OVMF/OVMF_VARS_4M.fd"
 
@@ -33,10 +35,10 @@ shutil.copy(OVMF_VARS, vars_path)
 
 args = [
     "qemu-system-x86_64", "-name", "cyborgroid-iso", "-accel", "kvm", "-cpu", "host",
-    "-smp", "4", "-m", "6144", "-M", "q35",
+    "-smp", "4", "-m", "4096", "-M", "q35",
     "-drive", f"if=pflash,format=raw,readonly=on,file={OVMF}",
     "-drive", f"if=pflash,format=raw,file={vars_path}",
-    "-vga", "vmware", "-device", "qemu-xhci", "-device", "usb-tablet", "-device", "usb-kbd",
+    "-device", f"virtio-vga,xres={SCREEN_W},yres={SCREEN_H}", "-device", "qemu-xhci", "-device", "usb-tablet", "-device", "usb-kbd",
     "-nic", "user,model=e1000", "-display", "none", "-qmp", f"unix:{qmp_path},server,nowait",
     "-serial", f"file:{out}/serial.log",
 ]
