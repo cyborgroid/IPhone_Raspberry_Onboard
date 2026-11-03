@@ -47,7 +47,7 @@ os/build-iso.sh
 
 결과는 `build/cyborgroid-amd64-날짜.iso`입니다.
 
-- **VMware:** 새 가상 머신의 CD/DVD에 ISO를 넣고, 게스트 OS는 Ubuntu 64-bit, 메모리는 4GB 이상으로 합니다. 화면은 iPhone 18 Pro 비율의 세로 창으로 뜹니다.
+- **VMware:** 새 가상 머신의 CD/DVD에 ISO를 넣고, 게스트 OS는 Ubuntu 64-bit, 펌웨어는 UEFI, 메모리는 4GB 이상으로 합니다. **Accelerate 3D graphics는 끕니다.** 화면은 iPhone 18 Pro 비율의 세로 창으로 뜹니다. VMware Workstation Pro 26H1에서 시험했습니다.
 - **노트북:** 내장 패널을 감지하면 일반 Ubuntu 데스크톱으로 시작합니다.
 - **화면 전환:** 터치 홈의 "데스크톱" 아이콘으로 데스크톱으로 가고, 앱 메뉴의 "터치 홈 화면"으로 돌아옵니다.
 

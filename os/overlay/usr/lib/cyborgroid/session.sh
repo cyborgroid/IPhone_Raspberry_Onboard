@@ -20,7 +20,11 @@ start_ubuntu() {
 }
 
 start_touch() {
-  XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway XMODIFIERS=@im=fcitx \
+  # Under VMware, vmwgfx rejects the dmabufs Xwayland hands to sway. That kills
+  # Xwayland and the home screen with it, so draw in software there.
+  local renderer=()
+  [ -d /sys/module/vmwgfx ] && renderer=(WLR_RENDERER=pixman)
+  env "${renderer[@]}" XDG_CURRENT_DESKTOP=sway XDG_SESSION_DESKTOP=sway XMODIFIERS=@im=fcitx \
     sway --config /usr/share/cyborgroid/sway/mobile.conf &
   pid=$!
 }

@@ -70,6 +70,9 @@ tar -C "$OS_DIR/iso-overlay" --owner=0 --group=0 --numeric-owner --mode='u+rwX,g
 
 # Points at the installer's package pool on the boot medium, absent in this chroot.
 rm -f "$MNT/etc/apt/sources.list.d/cdrom.sources"
+# Ubuntu's installer would open on the desktop and put plain Ubuntu on the disk,
+# without Cyborgroid, wiping whatever is there.
+rm -f "$MNT/etc/systemd/user/graphical-session.target.wants/ubuntu-desktop-installer.service"
 
 RESOLV_LINK=$(readlink "$MNT/etc/resolv.conf" || true)
 rm -f "$MNT/etc/resolv.conf"
