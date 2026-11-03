@@ -117,6 +117,19 @@
                     </StackPanel>
                 </Border>
             </UniformGrid>
+
+            <!-- iPhone 등록 -->
+            <Border IsVisible="{Binding IsIphonePage}" Classes="card" Padding="20" VerticalAlignment="Center">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="IPHONE" FontSize="14" FontWeight="Bold" Foreground="#00FF7F" />
+                    <TextBlock Text="{Binding IphoneStatus}" FontSize="20" FontWeight="Bold" Foreground="{Binding IphoneBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding IphoneHint}" FontSize="14" Foreground="#AAAAAA" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding IphoneDevice}" FontSize="14" Foreground="#DDDDDD" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding IphoneTether}" FontSize="14" Foreground="#DDDDDD" TextWrapping="Wrap" />
+                    <Button Content="iPhone 등록" Height="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            IsVisible="{Binding CanPairIphone}" Command="{Binding PairIphone}" />
+                </StackPanel>
+            </Border>
         </Panel>
 
         <!-- 페이지 표시와 브랜드 -->
@@ -125,6 +138,7 @@
                 <Ellipse Width="7" Height="7" Fill="{Binding Dot0}" />
                 <Ellipse Width="7" Height="7" Fill="{Binding Dot1}" />
                 <Ellipse Width="7" Height="7" Fill="{Binding Dot2}" />
+                <Ellipse Width="7" Height="7" Fill="{Binding Dot3}" />
             </StackPanel>
             <TextBlock Grid.Column="2" Text="CYBORGROID" FontSize="10" LetterSpacing="2" Foreground="#66FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Center" />
         </Grid>

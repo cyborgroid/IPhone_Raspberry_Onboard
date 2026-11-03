@@ -3,11 +3,13 @@
 //! using one JSON object per line.
 
 mod config;
+mod iphone;
 mod ledger;
 mod system;
 mod wifi;
 
 use config::Config;
+use iphone::{IPhone, PairState};
 use ledger::Ledger;
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader, Write};
@@ -33,6 +35,7 @@ struct Status {
     vpn: Vpn,
     scan_error: Option<String>,
     spatial: SpatialReport,
+    iphone: IPhone,
 }
 
 struct State {
@@ -44,6 +47,8 @@ struct State {
     vpn: Vpn,
     scan_error: Option<String>,
     spatial: SpatialReport,
+    iphone: IPhone,
+    iphone_pair_requested: bool,
 }
 
 #[derive(Deserialize)]
@@ -53,6 +58,7 @@ enum Request {
     Mode,
     /// `mode` absent means back to automatic detection.
     SetMode { mode: Option<Mode> },
+    IphonePair,
 }
 
 fn main() {
@@ -73,7 +79,8 @@ fn main() {
             query(&config, &format!(r#"{{"cmd":"set_mode","mode":"{m}"}}"#))
         }
         ["set-mode", "auto"] => query(&config, r#"{"cmd":"set_mode"}"#),
-        _ => die("usage: cyborgroid-core [--config FILE] [daemon | query status|mode | set-mode mobile|desktop|auto]"),
+        ["pair-iphone"] => query(&config, r#"{"cmd":"iphone_pair"}"#),
+        _ => die("usage: cyborgroid-core [--config FILE] [daemon | query status|mode | set-mode mobile|desktop|auto | pair-iphone]"),
     }
 }
 
@@ -117,6 +124,8 @@ fn daemon(config: Config) {
         vpn: system::vpn(&config.sys_root, &config.wg_interface, &config.killswitch_marker),
         scan_error: None,
         spatial: SpatialReport::default(),
+        iphone: IPhone::default(),
+        iphone_pair_requested: false,
     }));
 
     let listener = bind_socket(&config.socket_path);
@@ -127,6 +136,10 @@ fn daemon(config: Config) {
     {
         let (state, config) = (state.clone(), config.clone());
         thread::spawn(move || scan_loop(state, config));
+    }
+    {
+        let (state, config) = (state.clone(), config.clone());
+        thread::spawn(move || iphone_loop(state, config));
     }
 
     println!(
@@ -209,6 +222,35 @@ fn scan_loop(state: Arc<Mutex<State>>, config: Config) {
     }
 }
 
+fn iphone_loop(state: Arc<Mutex<State>>, config: Config) {
+    let tick = Duration::from_secs(config.tick_secs);
+    let mut next_poll = Instant::now();
+    let mut asking = false;
+    loop {
+        // Short sleeps so the trust dialog opens as soon as it is asked for.
+        thread::sleep(Duration::from_millis(200));
+        let (pair, known) = {
+            let s = state.lock().unwrap();
+            (s.iphone_pair_requested, s.iphone.info.clone())
+        };
+        if Instant::now() < next_poll && (!pair || asking) {
+            continue;
+        }
+        next_poll = Instant::now() + tick;
+
+        let report = iphone::poll(&config.sys_root, pair, known);
+        // Keep asking while the owner can still answer: an accepted dialog is only
+        // saved by another `pair`, and a locked phone shows the dialog once unlocked.
+        asking = pair
+            && matches!(report.state, PairState::AwaitingTrust | PairState::Locked | PairState::NotReady);
+        let mut s = state.lock().unwrap();
+        if pair && !asking {
+            s.iphone_pair_requested = false;
+        }
+        s.iphone = report;
+    }
+}
+
 /// `ap_count` 0 with no `similarity` is the initial, never-scanned report.
 fn previous_scan(report: &SpatialReport) -> Option<&[wifi::AccessPoint]> {
     (report.ap_count > 0 || report.similarity.is_some()).then_some(&report.access_points[..])
@@ -247,6 +289,12 @@ fn respond(line: &str, state: &Mutex<State>, config: &Config) -> String {
             s.forced_mode = mode;
             serde_json::to_string(&mode.unwrap_or(s.detected_mode))
         }
+        Request::IphonePair => {
+            if !matches!(s.iphone.state, PairState::Absent | PairState::Paired) {
+                s.iphone_pair_requested = true;
+            }
+            serde_json::to_string(&s.iphone.state)
+        }
         Request::Status => serde_json::to_string(&Status {
             mode,
             mode_forced: s.forced_mode.is_some(),
@@ -257,6 +305,7 @@ fn respond(line: &str, state: &Mutex<State>, config: &Config) -> String {
             vpn: s.vpn.clone(),
             scan_error: s.scan_error.clone(),
             spatial: s.spatial.clone(),
+            iphone: s.iphone.clone(),
         }),
     };
     result.unwrap_or_else(|e| serde_json::json!({ "error": e.to_string() }).to_string())

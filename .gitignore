@@ -7,3 +7,6 @@ core/target/
 # .NET
 shell/bin/
 shell/obj/
+
+# Editor settings and IntelliSense cache
+.vscode/

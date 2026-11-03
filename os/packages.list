@@ -18,6 +18,10 @@ iptables
 iw
 openssh-server
 
+# iPhone: pairing and USB tethering. The utils do not pull in usbmuxd by themselves.
+usbmuxd
+libimobiledevice-utils
+
 # Calls
 baresip-core
 

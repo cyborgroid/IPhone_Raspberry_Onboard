@@ -7,7 +7,7 @@ namespace CyborgroidDashboard.ViewModels;
 
 public sealed class MainViewModel : ViewModelBase
 {
-    public const int PageCount = 3;
+    public const int PageCount = 4;
 
     // gnome-control-center refuses to start outside a session that says it is GNOME.
     private const string SettingsCommand = "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center";
@@ -25,6 +25,8 @@ public sealed class MainViewModel : ViewModelBase
     {
         ShowDashboard = new RelayCommand(() => Page = 1);
         ShowRadar = new RelayCommand(() => Page = 2);
+        ShowIphone = new RelayCommand(() => Page = 3);
+        PairIphone = new RelayCommand(() => _ = PairIphoneAsync());
         OpenSettings = Launcher(SettingsCommand);
         var terminal = First("ptyxis", "gnome-terminal");
         Tiles =
@@ -40,6 +42,7 @@ public sealed class MainViewModel : ViewModelBase
             new AppTile("토큰", "#0F9D6B", Icons.Token, ShowDashboard),
             new AppTile("VPN", "#4A4F57", Icons.Shield, ShowDashboard),
             new AppTile("레이더", "#7A4FC0", Icons.Radar, ShowRadar),
+            new AppTile("iPhone", "#2B2D31", Icons.Iphone, ShowIphone),
             Tile("설정", "#E95420", Icons.Gear, SettingsCommand),
         ];
 
@@ -52,6 +55,8 @@ public sealed class MainViewModel : ViewModelBase
     public IReadOnlyList<AppTile> Tiles { get; }
     public ICommand ShowDashboard { get; }
     public ICommand ShowRadar { get; }
+    public ICommand ShowIphone { get; }
+    public ICommand PairIphone { get; }
     public ICommand OpenSettings { get; }
 
     private static ICommand Launcher(string command) =>
@@ -79,16 +84,18 @@ public sealed class MainViewModel : ViewModelBase
         {
             var clamped = Math.Clamp(value, 0, PageCount - 1);
             Set(ref _page, clamped);
-            Raise(nameof(IsHomePage), nameof(IsDashboardPage), nameof(IsRadarPage), nameof(Dot0), nameof(Dot1), nameof(Dot2));
+            Raise(nameof(IsHomePage), nameof(IsDashboardPage), nameof(IsRadarPage), nameof(IsIphonePage), nameof(Dot0), nameof(Dot1), nameof(Dot2), nameof(Dot3));
         }
     }
 
     public bool IsHomePage => Page == 0;
     public bool IsDashboardPage => Page == 1;
     public bool IsRadarPage => Page == 2;
+    public bool IsIphonePage => Page == 3;
     public IBrush Dot0 => Page == 0 ? Brushes.White : Faint;
     public IBrush Dot1 => Page == 1 ? Brushes.White : Faint;
     public IBrush Dot2 => Page == 2 ? Brushes.White : Faint;
+    public IBrush Dot3 => Page == 3 ? Brushes.White : Faint;
 
     private int _gridColumns = 3;
     public int GridColumns { get => _gridColumns; set => Set(ref _gridColumns, value); }
@@ -127,6 +134,31 @@ public sealed class MainViewModel : ViewModelBase
     private IReadOnlyList<AccessPointInfo> _accessPoints = [];
     public IReadOnlyList<AccessPointInfo> AccessPoints { get => _accessPoints; private set => Set(ref _accessPoints, value); }
 
+    private string _iphoneStatus = "-";
+    public string IphoneStatus { get => _iphoneStatus; private set => Set(ref _iphoneStatus, value); }
+
+    private IBrush _iphoneBrush = Muted;
+    public IBrush IphoneBrush { get => _iphoneBrush; private set => Set(ref _iphoneBrush, value); }
+
+    private string _iphoneHint = "";
+    public string IphoneHint { get => _iphoneHint; private set => Set(ref _iphoneHint, value); }
+
+    private string _iphoneDevice = "";
+    public string IphoneDevice { get => _iphoneDevice; private set => Set(ref _iphoneDevice, value); }
+
+    private string _iphoneTether = "";
+    public string IphoneTether { get => _iphoneTether; private set => Set(ref _iphoneTether, value); }
+
+    private bool _canPairIphone;
+    public bool CanPairIphone { get => _canPairIphone; private set => Set(ref _canPairIphone, value); }
+
+    private async Task PairIphoneAsync()
+    {
+        CanPairIphone = false;
+        await _core.PairIphoneAsync();
+        await RefreshAsync();
+    }
+
     private async Task RefreshAsync()
     {
         Clock = DateTime.Now.ToString("HH:mm");
@@ -158,6 +190,7 @@ public sealed class MainViewModel : ViewModelBase
             BatteryText = "--";
             BatteryFraction = 0;
             BatteryCharging = false;
+            ApplyIphone(null);
             return;
         }
 
@@ -175,7 +208,38 @@ public sealed class MainViewModel : ViewModelBase
         BatteryText = s.Battery is { } b ? $"{b.Percent}%" : "--";
         BatteryFraction = (s.Battery?.Percent ?? 0) / 100.0;
         BatteryCharging = s.Battery?.Charging ?? false;
+        ApplyIphone(s.Iphone);
     }
+
+    private void ApplyIphone(IphoneInfo? i)
+    {
+        (IphoneStatus, IphoneHint, IphoneBrush) = DescribeIphone(i);
+        CanPairIphone = i?.State is "not_paired" or "denied" or "error";
+        IphoneDevice = i?.Info is { } d
+            ? string.Join(" · ", new[] { d.DeviceName, d.Model, d.IosVersion is { } v ? $"iOS {v}" : null }.OfType<string>())
+            : "";
+        IphoneTether = i is null || i.State == "absent"
+            ? ""
+            : i.TetherInterface is null
+                ? "테더링 장치 없음 · 등록하면 나타납니다"
+                : i.TetherUp
+                    ? $"테더링 연결됨 ({i.TetherInterface})"
+                    : "테더링 꺼짐 · iPhone에서 개인용 핫스팟을 켜 주세요";
+    }
+
+    private static (string, string, IBrush) DescribeIphone(IphoneInfo? i) => i?.State switch
+    {
+        null => ("코어 엔진에 연결할 수 없음", "", Bad),
+        "paired" => ("iPhone 등록됨", "", Good),
+        "not_paired" => ("등록되지 않은 iPhone", "등록을 누르면 iPhone에 신뢰 확인 창이 뜹니다.", Warn),
+        "awaiting_trust" => ("iPhone에서 '신뢰'를 눌러 주세요", "iPhone 암호를 입력해야 할 수 있습니다.", Warn),
+        "locked" => ("iPhone 잠금을 풀어 주세요", "잠금이 풀리면 계속 진행합니다.", Warn),
+        "denied" => ("iPhone에서 신뢰를 거부했습니다", "다시 등록하려면 아래 버튼을 누르세요.", Bad),
+        "not_ready" => ("iPhone 연결 중", "계속 이 상태면 케이블을 다시 꽂고 잠금을 풀어 주세요.", Warn),
+        "tools_missing" => ("iPhone 도구가 없음", "libimobiledevice-utils와 usbmuxd를 설치해야 합니다.", Bad),
+        "error" => ("iPhone 확인 실패", i.Error ?? "", Bad),
+        _ => ("연결된 iPhone 없음", "USB 케이블로 연결하세요.", Muted),
+    };
 
     private static (string, IBrush) DescribeVpn(VpnInfo v)
     {
