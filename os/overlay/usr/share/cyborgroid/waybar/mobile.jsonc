@@ -1,0 +1,30 @@
+// The navigation bar: there are no hardware buttons on this device.
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 64,
+  "spacing": 0,
+  "modules-center": ["custom/close", "custom/home", "custom/switch", "custom/keyboard"],
+  "custom/home": {
+    "format": "⌂",
+    "tooltip": false,
+    "on-click": "swaymsg workspace number 1"
+  },
+  "custom/switch": {
+    "format": "⇄",
+    "tooltip": false,
+    "on-click": "swaymsg workspace number 2"
+  },
+  "custom/close": {
+    "format": "✕",
+    "tooltip": false,
+    // Limited to the apps workspace so this cannot close the home screen.
+    "on-click": "swaymsg '[workspace=\"^2$\" con_id=__focused__] kill'"
+  },
+  "custom/keyboard": {
+    "format": "⌨",
+    "tooltip": false,
+    // wvkbd toggles visibility on SIGRTMIN.
+    "on-click": "pkill --signal RTMIN wvkbd-mobintl"
+  }
+}

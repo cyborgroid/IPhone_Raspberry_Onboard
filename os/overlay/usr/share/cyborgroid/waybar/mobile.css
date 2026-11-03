@@ -1,0 +1,11 @@
+* {
+  font-family: "Noto Sans CJK KR", sans-serif;
+  font-size: 26px;
+  border: none;
+  min-height: 0;
+}
+window#waybar { background: #141418; color: #dddddd; }
+#custom-home, #custom-switch, #custom-close, #custom-keyboard {
+  padding: 0 44px;
+  font-size: 34px;
+}

@@ -1,0 +1,9 @@
+# Build outputs: OS images, VM disks, downloaded Ubuntu images, boot-test logs
+build/
+
+# Rust
+core/target/
+
+# .NET
+shell/bin/
+shell/obj/

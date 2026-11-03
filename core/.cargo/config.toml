@@ -1,0 +1,4 @@
+# Fully static arm64 binary for the device; needs only `rustup target add
+# aarch64-unknown-linux-musl`, no cross gcc.
+[target.aarch64-unknown-linux-musl]
+linker = "rust-lld"

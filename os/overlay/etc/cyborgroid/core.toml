@@ -1,0 +1,12 @@
+# cyborgroid-core settings; every key is optional. Shown values are the defaults.
+
+# Uplink. Its received bytes feed the ledger and it is the interface scanned.
+interface = "wlan0"
+wg_interface = "wg0"
+
+# Ledger rate: tokens per MiB received.
+tokens_per_mib = 0.01
+
+tick_secs = 5
+scan_secs = 30
+ledger_save_secs = 60

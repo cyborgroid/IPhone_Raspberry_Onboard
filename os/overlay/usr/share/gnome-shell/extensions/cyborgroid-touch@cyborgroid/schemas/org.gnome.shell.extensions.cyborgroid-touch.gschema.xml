@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.cyborgroid-touch" path="/org/gnome/shell/extensions/cyborgroid-touch/">
+    <key name="mode-override" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="touch"/>
+        <choice value="desktop"/>
+      </choices>
+      <default>"auto"</default>
+      <summary>auto follows the monitor; touch and desktop force a look for testing</summary>
+    </key>
+    <key name="desktop-settings" type="a{ss}">
+      <default>{}</default>
+      <summary>The user's settings to restore on leaving touch mode, as printed GVariants keyed by schema:key</summary>
+    </key>
+  </schema>
+</schemalist>

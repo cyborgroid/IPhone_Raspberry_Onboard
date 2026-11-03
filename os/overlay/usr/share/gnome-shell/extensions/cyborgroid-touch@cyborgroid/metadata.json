@@ -1,0 +1,7 @@
+{
+  "uuid": "cyborgroid-touch@cyborgroid",
+  "name": "Cyborgroid Touch",
+  "description": "Fits standard Ubuntu to a touchphone with the Cyborgroid home screen, in the graphic style of Ubuntu Touch. Turns itself off when a monitor is connected.",
+  "shell-version": ["50"],
+  "settings-schema": "org.gnome.shell.extensions.cyborgroid-touch"
+}

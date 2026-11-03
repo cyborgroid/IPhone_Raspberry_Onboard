@@ -1,0 +1,32 @@
+[Unit]
+Description=Cyborgroid core engine
+After=network-pre.target
+
+[Service]
+ExecStart=/usr/bin/cyborgroid-core daemon
+Restart=always
+RestartSec=2
+User=cyborgroid-core
+Group=cyborgroid
+UMask=0007
+RuntimeDirectory=cyborgroid
+RuntimeDirectoryMode=0750
+StateDirectory=cyborgroid
+StateDirectoryMode=0750
+# `iw` scans and `wg show` need this; the daemon needs nothing else.
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

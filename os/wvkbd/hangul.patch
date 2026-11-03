@@ -1,0 +1,155 @@
+--- a/layout.mobintl.h	2026-11-03 17:59:29.123181910 +0900
++++ b/layout.mobintl.h	2026-11-03 17:59:29.146537546 +0900
+@@ -22,6 +22,7 @@
+ 	Greek,
+ 	Georgian,
+ 	Hebrew,
++	Hangul,
+ 	Emoji,
+ 	Nav,
+ 	Landscape,
+@@ -68,7 +69,7 @@
+ 	NumLayouts,
+ };
+ 
+-static struct key keys_full[], keys_full_wide[], keys_special[], keys_specialpad[], keys_simple[],
++static struct key keys_hangul[], keys_full[], keys_full_wide[], keys_special[], keys_specialpad[], keys_simple[],
+   keys_cyrillic[], keys_arabic[], keys_persian[], keys_georgian[], keys_greek[], keys_hebrew[],
+   keys_emoji[], keys_nav[], keys_landscape[], keys_landscape_special[], keys_compose_a[],
+   keys_compose_e[], keys_compose_y[], keys_compose_u[], keys_compose_i[],
+@@ -98,6 +99,7 @@
+   [Greek] = {keys_greek, "greek", "greek", true},
+   [Georgian] = {keys_georgian, "georgian", "georgian", true},
+   [Hebrew] = {keys_hebrew, "hebrew", "hebrew", true},
++  [Hangul] = {keys_hangul, "latin", "hangul", true},
+   [Emoji] = {keys_emoji, "latin", "emoji", false},
+   [Nav] = {keys_nav, "latin", "nav", false},
+   [Landscape] = {keys_landscape, "latin", "landscape", true},
+@@ -172,6 +174,80 @@
+  *
+  * - layout: layout to switch to when key is pressed
+  */
++/* Dubeolsik labels on the Latin keycodes. The characters are composed by the input
++ * method (fcitx5-hangul), which kbd_switch_layout selects for this layer. */
++static struct key keys_hangul[] = {
++  {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
++  {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
++  {"↑", "↑", 1.0, Code, KEY_UP, .scheme = 1},
++  {"↓", "↓", 1.0, Code, KEY_DOWN, .scheme = 1},
++  {"←", "←", 1.0, Code, KEY_LEFT, .scheme = 1},
++  {"→", "→", 1.0, Code, KEY_RIGHT, .scheme = 1},
++  {"'", "\"", 1.0, Code, KEY_APOSTROPHE, &layouts[ComposeBracket] },
++  {"-", "_", 1.0, Code, KEY_MINUS, &layouts[ComposeMath] },
++  {"/", ">", 1.0, Code, KEY_SLASH,  &layouts[ComposePunctuation] },
++  {"Tab", "Tab", 1.0, Code, KEY_TAB, .scheme = 1},
++  {"", "", 0.0, EndRow},
++
++  {"1", "!", 1.0, Code, KEY_1},
++  {"2", "@", 1.0, Code, KEY_2},
++  {"3", "#", 1.0, Code, KEY_3},
++  {"4", "$", 1.0, Code, KEY_4},
++  {"5", "%", 1.0, Code, KEY_5},
++  {"6", "^", 1.0, Code, KEY_6},
++  {"7", "&", 1.0, Code, KEY_7},
++  {"8", "*", 1.0, Code, KEY_8},
++  {"9", "(", 1.0, Code, KEY_9, &layouts[ComposeBracket]},
++  {"0", ")", 1.0, Code, KEY_0, &layouts[ComposeBracket]},
++  {"", "", 0.0, EndRow},
++
++  {"ㅂ", "ㅃ", 1.0, Code, KEY_Q},
++  {"ㅈ", "ㅉ", 1.0, Code, KEY_W},
++  {"ㄷ", "ㄸ", 1.0, Code, KEY_E},
++  {"ㄱ", "ㄲ", 1.0, Code, KEY_R},
++  {"ㅅ", "ㅆ", 1.0, Code, KEY_T},
++  {"ㅛ", "ㅛ", 1.0, Code, KEY_Y},
++  {"ㅕ", "ㅕ", 1.0, Code, KEY_U},
++  {"ㅑ", "ㅑ", 1.0, Code, KEY_I},
++  {"ㅐ", "ㅒ", 1.0, Code, KEY_O},
++  {"ㅔ", "ㅖ", 1.0, Code, KEY_P},
++  {"", "", 0.0, EndRow},
++
++  {"", "", 0.5, Pad},
++  {"ㅁ", "ㅁ", 1.0, Code, KEY_A},
++  {"ㄴ", "ㄴ", 1.0, Code, KEY_S},
++  {"ㅇ", "ㅇ", 1.0, Code, KEY_D},
++  {"ㄹ", "ㄹ", 1.0, Code, KEY_F},
++  {"ㅎ", "ㅎ", 1.0, Code, KEY_G},
++  {"ㅗ", "ㅗ", 1.0, Code, KEY_H},
++  {"ㅓ", "ㅓ", 1.0, Code, KEY_J},
++  {"ㅏ", "ㅏ", 1.0, Code, KEY_K},
++  {"ㅣ", "ㅣ", 1.0, Code, KEY_L},
++  {"", "", 0.5, Pad},
++  {"", "", 0.0, EndRow},
++
++  {"⇧", "⇫", 1.5, Mod, Shift, .scheme = 1},
++  {"ㅋ", "ㅋ", 1.0, Code, KEY_Z},
++  {"ㅌ", "ㅌ", 1.0, Code, KEY_X},
++  {"ㅊ", "ㅊ", 1.0, Code, KEY_C},
++  {"ㅍ", "ㅍ", 1.0, Code, KEY_V},
++  {"ㅠ", "ㅠ", 1.0, Code, KEY_B},
++  {"ㅜ", "ㅜ", 1.0, Code, KEY_N},
++  {"ㅡ", "ㅡ", 1.0, Code, KEY_M},
++  {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
++  {"", "", 0.0, EndRow},
++
++  {"기호", "기호", 1.5, NextLayer, .scheme = 1},
++  {"", "", 1.0, Pad},
++  {",", "'", 1.0, Code, KEY_COMMA, &layouts[ComposeMath]},
++  {"", "Tab", 4.0, Code, KEY_SPACE},
++  {".", "?", 1.0, Code, KEY_DOT, &layouts[ComposePunctuation]},
++  {"Enter", "Enter", 1.5, Code, KEY_ENTER, .scheme = 1},
++
++  /* end of layout */
++  {"", "", 0.0, Last},
++};
++
+ static struct key keys_full[] = {
+   {"Esc", "Esc", 1.0, Code, KEY_ESC, .scheme = 1},
+   {"Ctr", "Ctr", 1.0, Mod, Ctrl, .scheme = 1},
+@@ -233,7 +309,7 @@
+   {"⌫", "⌫", 1.5, Code, KEY_BACKSPACE, .scheme = 1},
+   {"", "", 0.0, EndRow},
+ 
+-  {"⌨͕", "⌨͔", 1.5, NextLayer, .scheme = 1},
++  {"한글", "한글", 1.5, NextLayer, .scheme = 1},
+   {"Cmp", "Cmp", 1.0, Compose, .scheme = 1},
+   {",", "'", 1.0, Code, KEY_COMMA, &layouts[ComposeMath]},
+   {"", "Tab", 4.0, Code, KEY_SPACE},
+--- a/keyboard.c	2026-11-03 17:59:29.122476681 +0900
++++ b/keyboard.c	2026-11-03 17:59:29.146752642 +0900
+@@ -2,6 +2,8 @@
+ #include <linux/input-event-codes.h>
+ #include <stddef.h>
+ #include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
+ #include <sys/mman.h>
+ #include "keyboard.h"
+ #include "drw.h"
+@@ -19,6 +21,18 @@
+ #endif
+ #include KEYMAP
+ 
++/* Keeps the input method in step with the visible layer: Hangul composes only on
++ * the Hangul layer, so the Latin layers type plain letters. */
++static void
++kbd_sync_input_method(struct layout *from, struct layout *to)
++{
++    bool was_hangul = from && strcmp(from->name, "hangul") == 0;
++    bool is_hangul = strcmp(to->name, "hangul") == 0;
++    if (was_hangul != is_hangul)
++        system(is_hangul ? "fcitx5-remote -s hangul >/dev/null 2>&1 &"
++                         : "fcitx5-remote -s keyboard-us >/dev/null 2>&1 &");
++}
++
+ void
+ kbd_switch_layout(struct kbd *kb, struct layout *l, size_t layer_index)
+ {
+@@ -29,6 +43,7 @@
+     }
+     kb->layer_index = layer_index;
+     kb->layout = l;
++    kbd_sync_input_method(kb->prevlayout, l);
+     if (kb->debug)
+         fprintf(stderr, "Switching to layout %s, layer_index %ld\n",
+                 kb->layout->name, layer_index);

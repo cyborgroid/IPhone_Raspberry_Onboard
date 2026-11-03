@@ -1,0 +1,25 @@
+[Unit]
+Description=Cyborgroid graphical session
+After=systemd-user-sessions.service cyborgroid-core.service getty@tty1.service plymouth-quit.service
+Wants=cyborgroid-core.service
+Conflicts=getty@tty1.service
+
+[Service]
+User=cyborg
+WorkingDirectory=~
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+UtmpIdentifier=tty1
+UtmpMode=user
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+Environment=XDG_SESSION_TYPE=wayland
+ExecStart=/usr/lib/cyborgroid/session.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

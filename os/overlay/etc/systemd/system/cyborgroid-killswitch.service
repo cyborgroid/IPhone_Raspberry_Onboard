@@ -1,0 +1,20 @@
+[Unit]
+Description=WireGuard kill-switch
+Documentation=file:/etc/cyborgroid/killswitch.conf
+DefaultDependencies=no
+# Must be shut before any network comes up. Skipped until a tunnel is configured,
+# otherwise a fresh device could never get online to be set up.
+ConditionPathExists=/etc/wireguard/wg0.conf
+After=local-fs.target cyborgroid-firstboot.service
+Before=network-pre.target shutdown.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/cyborgroid/wireguard-killswitch.sh up
+# No ExecStop on purpose: stopping this unit must not open the firewall.
+# Opening it takes an explicit `wireguard-killswitch.sh down`.
+
+[Install]
+WantedBy=sysinit.target

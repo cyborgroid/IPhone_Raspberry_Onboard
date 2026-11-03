@@ -1,0 +1,132 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CyborgroidDashboard.ViewModels"
+        xmlns:v="using:CyborgroidDashboard.Views"
+        x:Class="CyborgroidDashboard.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Cyborgroid" Width="480" Height="800" Background="#1E1E1E">
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#2D2D2D" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+        <Style Selector="Button.tile">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.tile:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.tile:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.tile:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#22FFFFFF" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Offset="0" Color="#141418" />
+                <GradientStop Offset="0.6" Color="#1E1A1E" />
+                <GradientStop Offset="1" Color="#3D2320" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- 상태 표시줄 -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="16,8,16,0">
+            <TextBlock Grid.Column="0" Text="{Binding Clock}" FontSize="14" Foreground="#DDDDDD" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="16,0" VerticalAlignment="Center">
+                <Ellipse Width="8" Height="8" Fill="{Binding VpnBrush}" />
+                <TextBlock Text="{Binding VpnStatus}" FontSize="12" Foreground="#AAAAAA" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="⚡" FontSize="14" Foreground="#00FF7F" IsVisible="{Binding BatteryCharging}" />
+                <TextBlock Text="{Binding BatteryText}" FontSize="16" FontWeight="Bold" Foreground="White" />
+                <ProgressBar Width="56" Height="6" MinWidth="0" Minimum="0" Maximum="1" Value="{Binding BatteryFraction}"
+                             Foreground="#00FF7F" Background="#33FFFFFF" VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 페이지 -->
+        <Panel Grid.Row="1" Margin="16,8">
+
+            <!-- 홈: After 이미지의 앱 그리드 -->
+            <ItemsControl IsVisible="{Binding IsHomePage}" ItemsSource="{Binding Tiles}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="{Binding GridColumns, DataType=vm:MainViewModel}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AppTile">
+                        <Button Classes="tile" Command="{Binding Command}" Opacity="{Binding Opacity}">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <Border Width="56" Height="56" CornerRadius="14" Background="{Binding Background}" HorizontalAlignment="Center">
+                                    <PathIcon Width="30" Height="30" Data="{Binding Icon}" Foreground="{Binding IconBrush}" />
+                                </Border>
+                                <TextBlock Text="{Binding Title}" FontSize="12" Foreground="#DDDDDD" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- 대시보드: 아키텍처 사양서 6장 -->
+            <Grid IsVisible="{Binding IsDashboardPage}" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+                <TextBlock Grid.Row="0" Text="BORDERLESS TOUCHPHONE" FontSize="20" FontWeight="Bold" Foreground="#00FF7F" />
+                <UniformGrid Grid.Row="1" Columns="{Binding CardColumns}" RowSpacing="12" ColumnSpacing="12">
+                    <Border Classes="card" Padding="20">
+                        <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="MINTED DATA TOKENS" FontSize="14" Foreground="#AAAAAA" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding MintedTokens}" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" />
+                            <TextBlock Text="TOKENS" FontSize="12" Foreground="#00FF7F" HorizontalAlignment="Center" />
+                            <TextBlock Text="이 기기의 사용량 기록 · 금전 가치 없음" FontSize="11" Foreground="#888888" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Padding="20">
+                        <StackPanel Spacing="8" VerticalAlignment="Center">
+                            <TextBlock Text="FREE NODE &amp; SPATIAL ENGINE" FontSize="12" Foreground="#AAAAAA" />
+                            <TextBlock Text="{Binding TrafficStatus}" FontSize="14" Foreground="#DDDDDD" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding VpnStatus}" FontSize="14" Foreground="{Binding VpnBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="15" HorizontalAlignment="Center">
+                    <Button Content="VPN 상태" Width="120" Height="44" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding ShowDashboard}" />
+                    <Button Content="공간 스캔" Width="120" Height="44" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding ShowRadar}" />
+                    <Button Content="설정" Width="100" Height="44" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding OpenSettings}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- 공간 레이더 -->
+            <UniformGrid IsVisible="{Binding IsRadarPage}" Columns="{Binding CardColumns}" RowSpacing="12" ColumnSpacing="12">
+                <v:RadarView AccessPoints="{Binding AccessPoints}" />
+                <Border Classes="card" Padding="20">
+                    <StackPanel Spacing="10" VerticalAlignment="Center">
+                        <TextBlock Text="SPATIAL RADAR" FontSize="14" FontWeight="Bold" Foreground="#00FF7F" />
+                        <TextBlock Text="{Binding SpatialSummary}" FontSize="14" Foreground="#DDDDDD" TextWrapping="Wrap" />
+                        <TextBlock Text="중심에 가까울수록 신호가 강합니다. 점의 각도는 실제 방향이 아닙니다."
+                                   FontSize="11" Foreground="#888888" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </Panel>
+
+        <!-- 페이지 표시와 브랜드 -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" Margin="16,0,16,8">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Ellipse Width="7" Height="7" Fill="{Binding Dot0}" />
+                <Ellipse Width="7" Height="7" Fill="{Binding Dot1}" />
+                <Ellipse Width="7" Height="7" Fill="{Binding Dot2}" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="CYBORGROID" FontSize="10" LetterSpacing="2" Foreground="#66FFFFFF" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

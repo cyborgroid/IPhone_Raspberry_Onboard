@@ -1,0 +1,7 @@
+// The device owner manages networks from the touch UI without a password prompt.
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.freedesktop.NetworkManager.") == 0 &&
+        subject.isInGroup("cyborgroid") && subject.local && subject.active) {
+        return polkit.Result.YES;
+    }
+});

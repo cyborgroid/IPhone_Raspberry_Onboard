@@ -1,0 +1,30 @@
+# Installed on top of the official Ubuntu 26.04 Desktop image for Raspberry Pi,
+# which supplies GNOME, the standard desktop used when a monitor is connected.
+# Installed with --no-install-recommends, so anything needed at runtime is listed.
+
+# Touch session: a home screen modelled on Ubuntu Touch, built from these rather
+# than from Ubuntu Touch itself. Its apps are the ones the desktop image ships.
+sway
+waybar
+wvkbd
+fcitx5
+fcitx5-hangul
+wlr-randr
+grim
+
+# Network and security
+wireguard-tools
+iptables
+iw
+openssh-server
+
+# Calls
+baresip-core
+
+# First boot
+cloud-guest-utils
+
+# Fonts and Korean input for the desktop
+fonts-noto-cjk
+fonts-noto-color-emoji
+ibus-hangul

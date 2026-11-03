@@ -1,0 +1,14 @@
+[Unit]
+Description=Cyborgroid provisioning (grow root, import seeds from the boot partition)
+DefaultDependencies=no
+After=local-fs.target
+Before=cyborgroid-killswitch.service NetworkManager.service wg-quick@wg0.service ssh.service sysinit.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/cyborgroid/firstboot.sh
+
+[Install]
+WantedBy=sysinit.target

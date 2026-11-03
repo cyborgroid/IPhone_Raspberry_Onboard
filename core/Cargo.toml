@@ -1,0 +1,18 @@
+[package]
+name = "cyborgroid-core"
+version = "0.1.0"
+edition = "2024"
+description = "Cyborgroid core engine: traffic ledger, Wi-Fi spatial sensing, mode detection, IPC"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+signal-hook = { version = "0.3", default-features = false }
+toml = "0.8"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+panic = "abort"

@@ -1,0 +1,59 @@
+/* Only applies while touch mode has put .cyborgroid-touch on the UI group, so a
+   monitor brings back plain Ubuntu. Colours follow Ubuntu Touch's Suru palette. */
+
+.cyborgroid-touch #panel {
+  background-color: transparent;
+  font-size: 11pt;
+  font-weight: 400;
+  height: 28px;
+}
+
+.cyborgroid-touch #panel .panel-button {
+  color: #f7f7f7;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.cyborgroid-home-label {
+  color: #f0f0f0;
+  text-align: center;
+  font-weight: 400;
+}
+
+.cyborgroid-home-tile {
+  border-radius: 22%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.cyborgroid-home-button:active .cyborgroid-home-tile {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.cyborgroid-home-percent {
+  color: #ffffff;
+  font-weight: 300;
+}
+
+.cyborgroid-home-bar-track {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-radius: 99px;
+}
+
+.cyborgroid-home-bar-fill {
+  background-color: #3eb34f;
+  border-radius: 99px;
+}
+
+.cyborgroid-home-bolt {
+  color: #3eb34f;
+}
+
+.cyborgroid-home-dot {
+  background-color: rgba(255, 255, 255, 0.28);
+  border-radius: 99px;
+}
+
+.cyborgroid-home-dot-active {
+  background-color: #ffffff;
+}

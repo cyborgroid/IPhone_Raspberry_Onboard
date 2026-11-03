@@ -1,0 +1,9 @@
+
+# --- Cyborgroid ---
+# The official Touch Display 2 is auto-detected, through display_auto_detect=1 in the
+# base config above, so it needs no overlay here.
+[pi5]
+# Battery power: leave this commented out unless the supply really delivers
+# 5 V 5 A; it lets the USB ports draw 1.6 A instead of 600 mA.
+#usb_max_current_enable=1
+[all]

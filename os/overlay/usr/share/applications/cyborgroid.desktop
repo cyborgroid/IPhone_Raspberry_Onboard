@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Cyborgroid
+Comment=VPN, traffic ledger and Wi-Fi radar
+Exec=/usr/bin/cyborgroid-shell
+Icon=cyborgroid
+Terminal=false
+Categories=Network;System;
