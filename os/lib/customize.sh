@@ -10,6 +10,8 @@ HERE=$(dirname "$(readlink -f "$0")")
 OS_DIR=$(dirname "$HERE")
 # shellcheck source=loop.sh
 . "$HERE/loop.sh"
+# shellcheck source=payload.sh
+. "$HERE/payload.sh"
 EXTRA_SIZE=9G
 MNT=$(mktemp -d)
 qemu_registered_here=0
@@ -51,21 +53,7 @@ mount "$BOOT_LOOP" "$MNT/boot/firmware"
 for fs in proc sys dev dev/pts; do mount --rbind "/$fs" "$MNT/$fs"; done
 
 echo "==> copying payload"
-# Everything is root-owned whoever ran the build, and directories that already
-# exist in the image keep their metadata. The builder's uid is also the uid of the
-# device's auto-login user, so keeping it would let that user rewrite /etc and
-# the scripts that run as root.
-tar -C "$OS_DIR/overlay" --owner=0 --group=0 --numeric-owner --mode='u+rwX,go+rX,go-w' -cf - . \
-  | tar -C "$MNT" --no-overwrite-dir -xf -
-install -m 755 "$CORE" "$MNT/usr/bin/cyborgroid-core"
-mkdir -p "$MNT/opt/cyborgroid/shell"
-tar -C "$SHELL_DIR" --owner=0 --group=0 --numeric-owner --mode='u+rwX,go+rX,go-w' -cf - . \
-  | tar -C "$MNT/opt/cyborgroid/shell" -xf -
-ln -sf /opt/cyborgroid/shell/cyborgroid-shell "$MNT/usr/bin/cyborgroid-shell"
-mkdir -p "$MNT/tmp/cyborgroid"
-cp "$OS_DIR/packages.list" "$MNT/tmp/cyborgroid/"
-cp "$HERE/chroot-setup.sh" "$MNT/tmp/cyborgroid/"
-cp "$OS_DIR/wvkbd/hangul.patch" "$MNT/tmp/cyborgroid/"
+copy_payload "$MNT" "$OS_DIR" "$CORE" "$SHELL_DIR"
 cat "$OS_DIR/boot-config.txt" >> "$MNT/boot/firmware/config.txt"
 mkdir -p "$MNT/boot/firmware/cyborgroid"
 

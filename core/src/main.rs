@@ -173,7 +173,8 @@ fn tick_loop(state: Arc<Mutex<State>>, config: &Config, ledger_path: &Path, term
         }
         next_tick = Instant::now() + tick;
 
-        let rx = system::rx_bytes(&config.sys_root, &config.interface);
+        let interface = system::resolve_interface(&config.sys_root, &config.interface);
+        let rx = system::rx_bytes(&config.sys_root, &interface);
         // Slow external commands run outside the lock so IPC never stalls on them.
         let mode = system::detect_mode(&config.sys_root);
         let battery = system::battery(&config.sys_root);
@@ -208,7 +209,7 @@ fn tick_loop(state: Arc<Mutex<State>>, config: &Config, ledger_path: &Path, term
 
 fn scan_loop(state: Arc<Mutex<State>>, config: Config) {
     loop {
-        let result = wifi::scan(&config.interface);
+        let result = wifi::scan(&system::resolve_interface(&config.sys_root, &config.interface));
         let mut s = state.lock().unwrap();
         match result {
             Ok(aps) => {

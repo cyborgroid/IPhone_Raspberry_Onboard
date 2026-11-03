@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs inside the arm64 root filesystem under qemu-user.
+# Runs inside the target root filesystem: arm64 under qemu-user for the Pi image,
+# native for the PC ISO.
 set -euxo pipefail
 export DEBIAN_FRONTEND=noninteractive LC_ALL=C.UTF-8
 
@@ -40,6 +41,7 @@ rm -f /etc/xdg/autostart/org.fcitx.Fcitx5.desktop
 # firstboot.sh replaces cloud-init. Disabled rather than purged, as is GDM below:
 # they sit under the ubuntu-desktop metapackage, and removing them would leave the
 # rest of the desktop open to autoremove.
+mkdir -p /etc/cloud
 touch /etc/cloud/cloud-init.disabled
 rm -f /etc/netplan/50-cloud-init.yaml
 

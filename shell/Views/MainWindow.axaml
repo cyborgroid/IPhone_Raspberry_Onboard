@@ -30,6 +30,19 @@
         </Style>
     </Window.Styles>
 
+    <Window.Resources>
+        <DataTemplate x:Key="TileTemplate" x:DataType="vm:AppTile">
+            <Button Classes="tile" Command="{Binding Command}" Opacity="{Binding Opacity}">
+                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                    <Border Width="62" Height="62" CornerRadius="14" Background="{Binding Background}" HorizontalAlignment="Center">
+                        <PathIcon Width="34" Height="34" Data="{Binding Icon}" Foreground="{Binding IconBrush}" />
+                    </Border>
+                    <TextBlock Text="{Binding Title}" FontSize="12" Foreground="#DDDDDD" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+    </Window.Resources>
+
     <Grid RowDefinitions="Auto,*,Auto">
         <Grid.Background>
             <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
@@ -57,26 +70,25 @@
         <!-- 페이지 -->
         <Panel Grid.Row="1" Margin="16,8">
 
-            <!-- 홈: After 이미지의 앱 그리드 -->
-            <ItemsControl IsVisible="{Binding IsHomePage}" ItemsSource="{Binding Tiles}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="{Binding GridColumns, DataType=vm:MainViewModel}" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:AppTile">
-                        <Button Classes="tile" Command="{Binding Command}" Opacity="{Binding Opacity}">
-                            <StackPanel Spacing="4" HorizontalAlignment="Center">
-                                <Border Width="56" Height="56" CornerRadius="14" Background="{Binding Background}" HorizontalAlignment="Center">
-                                    <PathIcon Width="30" Height="30" Data="{Binding Icon}" Foreground="{Binding IconBrush}" />
-                                </Border>
-                                <TextBlock Text="{Binding Title}" FontSize="12" Foreground="#DDDDDD" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- 홈: iPhone식 앱 격자와 하단 독 -->
+            <Grid IsVisible="{Binding IsHomePage}" RowDefinitions="*,Auto" RowSpacing="8">
+                <ItemsControl Grid.Row="0" ItemsSource="{Binding Tiles}" ItemTemplate="{StaticResource TileTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="{Binding GridColumns, DataType=vm:MainViewModel}" Rows="{Binding GridRows, DataType=vm:MainViewModel}" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+                <Border Grid.Row="1" Background="#33FFFFFF" CornerRadius="28" Padding="8">
+                    <ItemsControl ItemsSource="{Binding Dock}" ItemTemplate="{StaticResource TileTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4" Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Border>
+            </Grid>
 
             <!-- 대시보드: 아키텍처 사양서 6장 -->
             <Grid IsVisible="{Binding IsDashboardPage}" RowDefinitions="Auto,*,Auto" RowSpacing="8">

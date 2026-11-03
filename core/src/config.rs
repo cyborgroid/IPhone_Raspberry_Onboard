@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
     /// Interface whose received bytes feed the ledger and which is scanned.
+    /// "auto" picks one, for PCs whose interface names are not known in advance.
     pub interface: String,
     pub wg_interface: String,
     /// Tokens per MiB received. The architecture spec fixes this at 0.01.

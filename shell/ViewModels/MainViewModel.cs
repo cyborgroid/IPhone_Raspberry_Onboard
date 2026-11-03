@@ -10,6 +10,7 @@ public sealed class MainViewModel : ViewModelBase
     public const int PageCount = 4;
 
     // gnome-control-center refuses to start outside a session that says it is GNOME.
+    private const string DesktopCommand = "cyborgroid-core set-mode desktop";
     private const string SettingsCommand = "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center";
 
     private static readonly IBrush Good = SolidColorBrush.Parse("#00FF7F");
@@ -31,19 +32,25 @@ public sealed class MainViewModel : ViewModelBase
         var terminal = First("ptyxis", "gnome-terminal");
         Tiles =
         [
-            Tile("전화", "#2FB457", Icons.Phone, $"{terminal} -- baresip"),
+            Tile("갤러리", "#AF52DE", Icons.Image, First("loupe", "eog")),
+            Tile("메모", "#FFCC00", Icons.Note, First("gnome-text-editor", "gedit")),
+            Tile("계산기", "#48484A", Icons.Calculator, "gnome-calculator"),
+            Tile("터미널", "#2C2C2E", Icons.Terminal, terminal),
+            Tile("Wi-Fi", "#007AFF", Icons.Wifi, $"{terminal} -- nmtui"),
+            new AppTile("토큰", "#30B070", Icons.Token, ShowDashboard),
+            new AppTile("VPN", "#5856D6", Icons.Shield, ShowDashboard),
+            new AppTile("레이더", "#FF2D55", Icons.Radar, ShowRadar),
+            new AppTile("iPhone", "#1C1C1E", Icons.Iphone, ShowIphone),
+            new AppTile("데스크톱", "#5AC8FA", Icons.Desktop,
+                new RelayCommand(() => AppLauncher.Launch(DesktopCommand), AppLauncher.IsInstalled(DesktopCommand)),
+                AppLauncher.IsInstalled(DesktopCommand)),
+        ];
+        Dock =
+        [
+            Tile("전화", "#34C759", Icons.Phone, $"{terminal} -- baresip"),
             Tile("브라우저", "#FFFFFF", Icons.Globe, "firefox"),
-            Tile("파일", "#2F74D0", Icons.Folder, "nautilus"),
-            Tile("갤러리", "#5A4FB5", Icons.Image, First("loupe", "eog")),
-            Tile("메모", "#2AA3C7", Icons.Note, First("gnome-text-editor", "gedit")),
-            Tile("계산기", "#4A4F57", Icons.Calculator, "gnome-calculator"),
-            Tile("터미널", "#3A3D42", Icons.Terminal, terminal),
-            Tile("Wi-Fi", "#2F74D0", Icons.Wifi, $"{terminal} -- nmtui"),
-            new AppTile("토큰", "#0F9D6B", Icons.Token, ShowDashboard),
-            new AppTile("VPN", "#4A4F57", Icons.Shield, ShowDashboard),
-            new AppTile("레이더", "#7A4FC0", Icons.Radar, ShowRadar),
-            new AppTile("iPhone", "#2B2D31", Icons.Iphone, ShowIphone),
-            Tile("설정", "#E95420", Icons.Gear, SettingsCommand),
+            Tile("파일", "#32ADE6", Icons.Folder, "nautilus"),
+            Tile("설정", "#8E8E93", Icons.Gear, SettingsCommand),
         ];
 
         var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
@@ -53,6 +60,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     public IReadOnlyList<AppTile> Tiles { get; }
+    public IReadOnlyList<AppTile> Dock { get; }
     public ICommand ShowDashboard { get; }
     public ICommand ShowRadar { get; }
     public ICommand ShowIphone { get; }
@@ -97,8 +105,11 @@ public sealed class MainViewModel : ViewModelBase
     public IBrush Dot2 => Page == 2 ? Brushes.White : Faint;
     public IBrush Dot3 => Page == 3 ? Brushes.White : Faint;
 
-    private int _gridColumns = 3;
+    private int _gridColumns = 4;
     public int GridColumns { get => _gridColumns; set => Set(ref _gridColumns, value); }
+
+    private int _gridRows = 6;
+    public int GridRows { get => _gridRows; set => Set(ref _gridRows, value); }
 
     private int _cardColumns = 1;
     public int CardColumns { get => _cardColumns; set => Set(ref _cardColumns, value); }

@@ -23,7 +23,8 @@ public partial class MainWindow : Window
             if (DataContext is MainViewModel vm)
             {
                 var landscape = e.NewSize.Width >= e.NewSize.Height;
-                vm.GridColumns = landscape ? 4 : 3;
+                vm.GridColumns = landscape ? 5 : 4;
+                vm.GridRows = landscape ? 3 : 6;
                 vm.CardColumns = landscape ? 2 : 1;
             }
         };

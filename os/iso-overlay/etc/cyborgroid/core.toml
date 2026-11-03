@@ -1,0 +1,4 @@
+# cyborgroid-core settings for the PC build; see the Pi image's copy for all keys.
+
+# Interface names differ per PC, so the uplink is found at runtime.
+interface = "auto"

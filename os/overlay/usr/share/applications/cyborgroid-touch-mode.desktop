@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Touch Home Screen
+Name[ko]=터치 홈 화면
+Comment=Switch back to the Cyborgroid touch home screen
+Comment[ko]=Cyborgroid 터치 홈 화면으로 돌아갑니다
+Exec=cyborgroid-core set-mode mobile
+Icon=cyborgroid
+Terminal=false
+Categories=System;

@@ -37,6 +37,27 @@ fn read_trim(path: &Path) -> Option<String> {
     fs::read_to_string(path).ok().map(|s| s.trim().to_owned())
 }
 
+/// Resolves `interface = "auto"`: Wi-Fi if there is any, else the first wired link.
+/// Names differ per PC, and interfaces without a `device` link are virtual.
+pub fn resolve_interface(sys_root: &Path, configured: &str) -> String {
+    if configured != "auto" {
+        return configured.to_owned();
+    }
+    let mut names: Vec<String> = fs::read_dir(sys_root.join("class/net"))
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.path().join("device").exists())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    let wifi = names.iter().position(|n| n.starts_with("wl"));
+    match wifi {
+        Some(i) => names.swap_remove(i),
+        None => names.into_iter().next().unwrap_or_else(|| "lo".to_owned()),
+    }
+}
+
 pub fn rx_bytes(sys_root: &Path, interface: &str) -> Result<u64, String> {
     let path = sys_root.join("class/net").join(interface).join("statistics/rx_bytes");
     let text = fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
@@ -51,10 +72,21 @@ pub fn external_display_connected(sys_root: &Path) -> bool {
     })
 }
 
-/// The touchscreen runs Ubuntu Touch; a connected monitor means the full Ubuntu
-/// desktop. A DSI panel has a different connector name, so it never matches.
+/// A laptop's built-in panel. A Pi's DSI panel and a VM's virtual screen never match.
+pub fn laptop_panel_connected(sys_root: &Path) -> bool {
+    let Ok(entries) = fs::read_dir(sys_root.join("class/drm")) else { return false };
+    entries.flatten().any(|e| {
+        let name = e.file_name();
+        let name = name.to_string_lossy();
+        (name.contains("-eDP-") || name.contains("-LVDS-"))
+            && read_trim(&e.path().join("status")).as_deref() == Some("connected")
+    })
+}
+
+/// The touchscreen gets the home screen; a connected monitor or a laptop's panel
+/// means the full Ubuntu desktop.
 pub fn detect_mode(sys_root: &Path) -> Mode {
-    if external_display_connected(sys_root) {
+    if external_display_connected(sys_root) || laptop_panel_connected(sys_root) {
         Mode::Desktop
     } else {
         Mode::Mobile
@@ -138,6 +170,40 @@ mod tests {
 
         fs::write(hdmi.join("status"), "connected\n").unwrap();
         assert_eq!(detect_mode(&root), Mode::Desktop);
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn laptop_panel_means_desktop() {
+        let root = fake_tree("laptop");
+        let panel = root.join("class/drm/card1-eDP-1");
+        fs::create_dir_all(&panel).unwrap();
+        fs::write(panel.join("status"), "disconnected\n").unwrap();
+        assert_eq!(detect_mode(&root), Mode::Mobile);
+        fs::write(panel.join("status"), "connected\n").unwrap();
+        assert_eq!(detect_mode(&root), Mode::Desktop);
+
+        let vm = fake_tree("vm");
+        let virt = vm.join("class/drm/card0-Virtual-1");
+        fs::create_dir_all(&virt).unwrap();
+        fs::write(virt.join("status"), "connected\n").unwrap();
+        assert_eq!(detect_mode(&vm), Mode::Mobile);
+        fs::remove_dir_all(&root).unwrap();
+        fs::remove_dir_all(&vm).unwrap();
+    }
+
+    #[test]
+    fn auto_interface_prefers_wifi_and_skips_virtual_links() {
+        let root = fake_tree("auto");
+        assert_eq!(resolve_interface(&root, "wlan7"), "wlan7");
+        assert_eq!(resolve_interface(&root, "auto"), "lo");
+
+        fs::create_dir_all(root.join("class/net/docker0")).unwrap();
+        fs::create_dir_all(root.join("class/net/ens33/device")).unwrap();
+        assert_eq!(resolve_interface(&root, "auto"), "ens33");
+
+        fs::create_dir_all(root.join("class/net/wlp2s0/device")).unwrap();
+        assert_eq!(resolve_interface(&root, "auto"), "wlp2s0");
         fs::remove_dir_all(&root).unwrap();
     }
 
