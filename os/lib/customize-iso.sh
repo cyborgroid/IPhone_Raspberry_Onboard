@@ -26,24 +26,29 @@ cleanup() {
   set +e
   umount -R "$MNT" 2>/dev/null
   for m in "${LOWER_MOUNTS[@]}"; do umount "$m" 2>/dev/null; done
-  umount "$ISO" 2>/dev/null
+  # Before the ISO: the layers' loop devices keep files on it open.
   loop_detach_all
-  rm -rf "$WORK"
+  umount "$ISO" 2>/dev/null
+  # $MNT binds the real /dev and /sys, so never delete past a mount that is still there.
+  if findmnt -rn -o TARGET | grep -q "^$WORK/"; then
+    echo "still mounted, leaving $WORK in place:" >&2
+    findmnt -rn -o TARGET | grep "^$WORK/" >&2
+  else
+    rm -rf --one-file-system "$WORK"
+  fi
 }
 trap cleanup EXIT
 
-rm -rf "$WORK"
+rm -rf --one-file-system "$WORK"
 mkdir -p "$MNT" "$UPPER" "$OVERLAY_WORK" "$ISO"
 mount_ro "$BASE" "$ISO"
 
-echo "==> finding the live layers"
-GRUB_CFG=$ISO/boot/grub/grub.cfg
-LIVE_LAYER=$(grep -oE 'layerfs-path=[^ ]+' "$GRUB_CFG" | head -1 | cut -d= -f2)
-[ -n "$LIVE_LAYER" ] || { echo "no layerfs-path in grub.cfg" >&2; exit 1; }
+# The name is the stack: casper mounts minimal.standard.live.cyborgroid on top of the
+# parents it finds by dropping one dotted part at a time.
+LIVE_LAYER=minimal.standard.live.squashfs
 NEW_LAYER=${LIVE_LAYER%.squashfs}.cyborgroid.squashfs
-echo "live layer: $LIVE_LAYER, new layer: $NEW_LAYER"
+[ -f "$ISO/casper/$LIVE_LAYER" ] || { echo "no $LIVE_LAYER in the ISO" >&2; exit 1; }
 
-# minimal.standard.live is stacked on minimal.standard, which is on minimal.
 LOWER=""
 name=${LIVE_LAYER%.squashfs}
 while :; do
@@ -80,17 +85,20 @@ LAYER_FILE=$WORK/$NEW_LAYER
 mksquashfs "$UPPER" "$LAYER_FILE" -comp zstd -noappend -quiet
 
 echo "==> writing the ISO"
-sed "s/layerfs-path=$LIVE_LAYER/layerfs-path=$NEW_LAYER/g" "$GRUB_CFG" > "$WORK/grub.cfg"
-grep -q "layerfs-path=$NEW_LAYER" "$WORK/grub.cfg"
 SUMS=$WORK/md5sum.txt
-grep -v -E ' \./(boot/grub/grub\.cfg|casper/'"$NEW_LAYER"')$' "$ISO/md5sum.txt" > "$SUMS"
-echo "$(md5sum < "$WORK/grub.cfg" | cut -d' ' -f1)  ./boot/grub/grub.cfg" >> "$SUMS"
+grep -v -E ' \./(boot/grub/(grub|loopback)\.cfg)$' "$ISO/md5sum.txt" > "$SUMS"
+for cfg in grub loopback; do
+  sed -E "s#^(\s*linux\s+/casper/vmlinuz)#\1 layerfs-path=$NEW_LAYER#" "$ISO/boot/grub/$cfg.cfg" > "$WORK/$cfg.cfg"
+  grep -q "layerfs-path=$NEW_LAYER" "$WORK/$cfg.cfg"
+  echo "$(md5sum < "$WORK/$cfg.cfg" | cut -d' ' -f1)  ./boot/grub/$cfg.cfg" >> "$SUMS"
+done
 echo "$(md5sum < "$LAYER_FILE" | cut -d' ' -f1)  ./casper/$NEW_LAYER" >> "$SUMS"
 rm -f "$OUT"
 xorriso -indev "$BASE" -outdev "$OUT" -boot_image any replay \
   -volid CYBORGROID \
   -map "$LAYER_FILE" "/casper/$NEW_LAYER" \
   -map "$WORK/grub.cfg" /boot/grub/grub.cfg \
+  -map "$WORK/loopback.cfg" /boot/grub/loopback.cfg \
   -map "$SUMS" /md5sum.txt
 
 echo "==> done: $(du -h "$OUT" | cut -f1) $OUT"

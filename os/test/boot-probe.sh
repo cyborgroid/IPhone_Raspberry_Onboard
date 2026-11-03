@@ -103,15 +103,15 @@ close_app() {
   echo "@@TAP 286 1246"; sleep 6   # navigation bar: home
   echo "after closing: workspace $(workspace), windows: $(windows)"
 }
-open_tile calculator 584 460 45; close_app
-open_tile wifi 360 738 30; close_app
-open_tile settings 584 1016 60; close_app
-open_tile browser 360 180 240; close_app
+open_tile calculator 444 136 45; close_app
+open_tile wifi 108 291 30; close_app
+open_tile settings 603 1080 60; close_app
+open_tile browser 279 1080 240; close_app
 sec "type Korean with the on-screen keyboard"
 pgrep -a -u cyborg -x fcitx5 | cut -c1-80
 as_cyborg fcitx5-remote -n; which wvkbd-mobintl
 type_key() { echo "@@TAP $1 $2"; sleep 3; }
-echo "@@TAP 360 460"; sleep 40     # home screen: notes
+echo "@@TAP 276 136"; sleep 40     # home screen: notes
 echo "@@TAP 360 300"; sleep 4      # into the text area
 echo "@@TAP 534 1246"; sleep 8     # navigation bar: on-screen keyboard
 echo "@@SHOT typing-latin"; sleep 6
