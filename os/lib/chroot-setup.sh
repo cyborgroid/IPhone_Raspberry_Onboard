@@ -59,7 +59,8 @@ chmod +x /usr/lib/cyborgroid/*.sh /usr/bin/cyborgroid-core
 
 systemctl set-default graphical.target
 systemctl enable cyborgroid-firstboot.service cyborgroid-killswitch.service \
-  cyborgroid-core.service cyborgroid-session.service NetworkManager.service wg-quick@wg0.service
+  cyborgroid-core.service cyborgroid-session.service NetworkManager.service wg-quick@wg0.service \
+  avahi-daemon.service
 systemctl disable ssh.service ssh.socket systemd-networkd-wait-online.service getty@tty1.service || true
 # cyborgroid-session owns the display and chooses between the touch session and GNOME.
 systemctl disable gdm3.service || true

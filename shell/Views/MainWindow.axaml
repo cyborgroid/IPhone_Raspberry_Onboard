@@ -140,6 +140,12 @@
                     <TextBlock Text="{Binding IphoneTether}" FontSize="14" Foreground="#DDDDDD" TextWrapping="Wrap" />
                     <Button Content="iPhone 등록" Height="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                             IsVisible="{Binding CanPairIphone}" Command="{Binding PairIphone}" />
+                    <StackPanel Spacing="6" IsVisible="{Binding CanMirrorIphone}">
+                        <Button Content="iPhone 화면 받기" Height="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                Command="{Binding MirrorIphone}" />
+                        <TextBlock Text="같은 Wi-Fi에서 iPhone의 제어 센터 &gt; 화면 미러링 &gt; Cyborgroid를 고르세요. 화면만 표시되며 조작은 iPhone에서 합니다."
+                                   FontSize="12" Foreground="#888888" TextWrapping="Wrap" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Panel>

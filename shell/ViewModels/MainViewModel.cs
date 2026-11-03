@@ -10,6 +10,7 @@ public sealed class MainViewModel : ViewModelBase
     public const int PageCount = 4;
 
     // gnome-control-center refuses to start outside a session that says it is GNOME.
+    private const string MirrorCommand = "/usr/lib/cyborgroid/iphone-mirror.sh";
     private const string DesktopCommand = "cyborgroid-core set-mode desktop";
     private const string SettingsCommand = "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center";
 
@@ -28,6 +29,7 @@ public sealed class MainViewModel : ViewModelBase
         ShowRadar = new RelayCommand(() => Page = 2);
         ShowIphone = new RelayCommand(() => Page = 3);
         PairIphone = new RelayCommand(() => _ = PairIphoneAsync());
+        MirrorIphone = new RelayCommand(() => AppLauncher.Launch(MirrorCommand));
         OpenSettings = Launcher(SettingsCommand);
         var terminal = First("ptyxis", "gnome-terminal");
         Tiles =
@@ -65,6 +67,8 @@ public sealed class MainViewModel : ViewModelBase
     public ICommand ShowRadar { get; }
     public ICommand ShowIphone { get; }
     public ICommand PairIphone { get; }
+    public ICommand MirrorIphone { get; }
+    public bool CanMirrorIphone { get; } = File.Exists(MirrorCommand);
     public ICommand OpenSettings { get; }
 
     private static ICommand Launcher(string command) =>

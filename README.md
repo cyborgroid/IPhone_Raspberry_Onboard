@@ -63,6 +63,16 @@ os/register-boot.sh --remove   # 메뉴에서 제거
 
 USB로 연결한 iPhone을 홈 화면의 "iPhone" 아이콘에서 등록합니다. 등록을 누르면 iPhone에 신뢰 확인 창이 뜹니다. 등록 후 iPhone에서 개인용 핫스팟을 켜면 USB 테더링을 인터넷 회선으로 쓸 수 있습니다. PC에서 `run.sh`로 실행할 때는 `libimobiledevice-utils`와 `usbmuxd`가 필요합니다. 등록 해제는 `idevicepair unpair`입니다.
 
+## iPhone 화면 받기
+
+Apple OS는 iPhone에서 그대로 실행되고, 이 기기는 AirPlay로 그 화면과 소리를 받아 표시합니다. 수신에는 오픈소스 [UxPlay](https://github.com/FDH2/UxPlay)를 씁니다.
+
+1. 이 기기와 iPhone을 같은 Wi-Fi에 연결합니다. VMware에서는 네트워크를 **Bridged**로 합니다.
+2. 홈 화면의 "iPhone" 아이콘에서 "iPhone 화면 받기"를 누릅니다.
+3. iPhone의 제어 센터 > 화면 미러링에서 "Cyborgroid"를 고릅니다.
+
+화면 표시만 되고, 이 기기의 터치로 iPhone을 조작할 수는 없습니다. 받는 동안에는 같은 네트워크의 다른 Apple 기기도 이 기기로 미러링할 수 있습니다. 킬스위치가 켜져 있으면 외부 연결이 막혀 쓸 수 없습니다.
+
 ## 시험
 
 ```bash
