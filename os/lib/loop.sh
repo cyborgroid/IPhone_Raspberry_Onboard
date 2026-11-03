@@ -9,6 +9,8 @@ LOOPS=()
 loop_attach() { # image offset size
   local free minor
   free=$(losetup --find)
+  # With no node for it yet, this prints "/dev/loopN (lost)".
+  free=${free%% *}
   minor=${free#/dev/loop}
   [ -e "$free" ] || mknod "$free" b 7 "$minor"
   LOOP_DEV=$(losetup --find --show --offset "$2" --sizelimit "$3" "$1")
